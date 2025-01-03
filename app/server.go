@@ -24,7 +24,19 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
-	buff := make([]byte, 1024)
-	conn.Read(buff)
-	conn.Write([]byte{0, 0, 0, 0, 0, 0, 0, 7})
+
+	// Parse the last 4 bytes of the connection
+	buf := make([]byte, 4)
+	_, err = conn.Read(buf)
+	if err != nil {
+		fmt.Println("Error reading from connection: ", err.Error())
+		os.Exit(1)
+	}
+
+	// Send the last 4 bytes back to the client
+	_, err = conn.Write(buf)
+	if err != nil {
+		fmt.Println("Error writing to connection: ", err.Error())
+		os.Exit(1)
+	}
 }
