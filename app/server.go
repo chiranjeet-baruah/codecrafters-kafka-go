@@ -33,7 +33,8 @@ func main() {
 	}
 
 	// Skip first 8 bytes and write the rest back
-	_, err = conn.Write(buf[8:])
+	totalMinusEight := buf[8:]
+	_, err = conn.Write(totalMinusEight[:4])
 	// _, err = conn.Write(buf[:4])
 	if err != nil {
 		fmt.Println("Error writing to connection: ", err.Error())
