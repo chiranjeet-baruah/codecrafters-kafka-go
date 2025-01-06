@@ -32,7 +32,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	_, err = conn.Write(buf)
+	// Skip first 8 bytes and write the rest back
+	_, err = conn.Write(buf[8:])
+	// _, err = conn.Write(buf[:4])
 	if err != nil {
 		fmt.Println("Error writing to connection: ", err.Error())
 		os.Exit(1)
