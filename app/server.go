@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
 	"net"
 	"os"
@@ -9,6 +11,15 @@ import (
 // Ensures gofmt doesn't remove the "net" and "os" imports in stage 1 (feel free to remove this!)
 var _ = net.Listen
 var _ = os.Exit
+
+type ApiRequest struct {
+	CorrelationID uint32
+}
+
+type ApiResponse struct {
+	MessageSize   uint32
+	CorrelationID uint32
+}
 
 func main() {
 	fmt.Println("Logs from your program will appear here!")
@@ -25,19 +36,29 @@ func main() {
 	}
 	defer conn.Close()
 
+	// Replace the JSON unmarshalling code with binary parsing
 	buf := make([]byte, 1024)
-	_, err = conn.Read(buf)
+	n, err := conn.Read(buf)
 	if err != nil {
-		fmt.Println("Error reading from connection: ", err.Error())
+		fmt.Println("Error reading:", err.Error())
 		os.Exit(1)
 	}
 
-	// Skip first 8 bytes and write the rest back
-	totalMinusEight := buf[8:]
-	_, err = conn.Write(totalMinusEight[:4])
-	// _, err = conn.Write(buf[:4])
-	if err != nil {
-		fmt.Println("Error writing to connection: ", err.Error())
-		os.Exit(1)
+	data := buf[:n]
+	request := ApiRequest{}
+
+	// Parse the binary format
+	reader := bytes.NewReader(data)
+	binary.Read(reader, binary.BigEndian, &request.CorrelationID)
+
+	// Send the response
+	response := ApiResponse{
+		MessageSize:   0,
+		CorrelationID: request.CorrelationID,
 	}
+	// response to bytes
+	var responseBuf bytes.Buffer
+	binary.Write(&responseBuf, binary.BigEndian, response.MessageSize)
+	binary.Write(&responseBuf, binary.BigEndian, response.CorrelationID)
+	conn.Write(responseBuf.Bytes())
 }
