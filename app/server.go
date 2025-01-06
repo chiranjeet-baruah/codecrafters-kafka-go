@@ -9,24 +9,15 @@ import (
 )
 
 type ApiVersionsRequest struct {
-	Length        int32
-	ApiKey        int16
-	ApiVersion    int16
-	CorrelationID int32
-	ClientID      string
+	MessageSize       int32
+	RequestApiKey     int16
+	RequestApiVersion int16
+	CorrelationID     int32
 }
 
 type ApiVersionsResponse struct {
-	Length        int32
+	MessageSize   int32
 	CorrelationID int32
-	ErrorCode     int16
-	ApiKeys       []ApiKey
-}
-
-type ApiKey struct {
-	ApiKey     int16
-	MinVersion int16
-	MaxVersion int16
 }
 
 func main() {
@@ -63,9 +54,9 @@ func handleConnection(conn net.Conn) {
 	reader := bytes.NewReader(data)
 
 	var request ApiVersionsRequest
-	binary.Read(reader, binary.BigEndian, &request.Length)
-	binary.Read(reader, binary.BigEndian, &request.ApiKey)
-	binary.Read(reader, binary.BigEndian, &request.ApiVersion)
+	binary.Read(reader, binary.BigEndian, &request.MessageSize)
+	binary.Read(reader, binary.BigEndian, &request.RequestApiKey)
+	binary.Read(reader, binary.BigEndian, &request.RequestApiVersion)
 	binary.Read(reader, binary.BigEndian, &request.CorrelationID)
 
 	// Prepare response
