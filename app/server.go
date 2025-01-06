@@ -59,9 +59,6 @@ func handleConnection(conn net.Conn) {
 	binary.Read(reader, binary.BigEndian, &request.RequestApiVersion)
 	binary.Read(reader, binary.BigEndian, &request.CorrelationID)
 
-	// Print request
-	fmt.Printf("Received request: %+v\n", request)
-
 	// Prepare response
 	response := ApiVersionsResponse{
 		MessageSize:   10,
