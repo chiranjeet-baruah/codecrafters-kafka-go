@@ -18,6 +18,7 @@ type ApiVersionsRequest struct {
 type ApiVersionsResponse struct {
 	MessageSize   int32
 	CorrelationID int32
+	ErrorCode     int16
 }
 
 func main() {
@@ -65,10 +66,21 @@ func handleConnection(conn net.Conn) {
 		CorrelationID: request.CorrelationID,
 	}
 
+	// If RequestApiVersion is not in 0 to 4, return UNSUPPORTED_VERSION
+	if request.RequestApiVersion < 0 || request.RequestApiVersion > 4 {
+		response.ErrorCode = 35
+	} else {
+		response.ErrorCode = 0
+	}
+
 	// Serialize response
 	var responseBuf bytes.Buffer
 	binary.Write(&responseBuf, binary.BigEndian, response.MessageSize)
 	binary.Write(&responseBuf, binary.BigEndian, response.CorrelationID)
+	binary.Write(&responseBuf, binary.BigEndian, response.ErrorCode)
+
+	// Print response
+	fmt.Println("Response:", response)
 
 	// Send complete response
 	conn.Write(responseBuf.Bytes())
