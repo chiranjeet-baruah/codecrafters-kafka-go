@@ -88,9 +88,6 @@ func handleConnection(conn net.Conn) {
 	binary.Write(&responseBuf, binary.BigEndian, response.ErrorCode)
 	binary.Write(&responseBuf, binary.BigEndian, response.APIVersion)
 
-	// Print response
-	// fmt.Println("Response:", response)
-
 	// Send complete response
 	conn.Write(responseBuf.Bytes())
 }
