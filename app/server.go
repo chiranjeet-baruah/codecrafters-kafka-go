@@ -13,13 +13,19 @@ type ApiVersionsRequest struct {
 	RequestApiKey     int16
 	RequestApiVersion int16
 	CorrelationID     int32
+	APIVersion        int16
 }
 
 type ApiVersionsResponse struct {
 	MessageSize   int32
 	CorrelationID int32
 	ErrorCode     int16
+	APIVersion    int16
 }
+
+const (
+	MAX_API_VERSION = 18
+)
 
 func main() {
 	fmt.Println("Starting Kafka server...")
@@ -59,6 +65,7 @@ func handleConnection(conn net.Conn) {
 	binary.Read(reader, binary.BigEndian, &request.RequestApiKey)
 	binary.Read(reader, binary.BigEndian, &request.RequestApiVersion)
 	binary.Read(reader, binary.BigEndian, &request.CorrelationID)
+	binary.Read(reader, binary.BigEndian, &request.APIVersion)
 
 	// Prepare response
 	response := ApiVersionsResponse{
@@ -67,10 +74,11 @@ func handleConnection(conn net.Conn) {
 	}
 
 	// If RequestApiVersion is not in 0 to 4, return UNSUPPORTED_VERSION
-	if request.RequestApiVersion < 0 || request.RequestApiVersion > 4 {
+	if request.RequestApiVersion < 0 || request.RequestApiVersion >= 4 || request.RequestApiVersion > MAX_API_VERSION {
 		response.ErrorCode = 35
 	} else {
 		response.ErrorCode = 0
+		response.APIVersion = request.RequestApiVersion
 	}
 
 	// Serialize response
@@ -78,9 +86,10 @@ func handleConnection(conn net.Conn) {
 	binary.Write(&responseBuf, binary.BigEndian, response.MessageSize)
 	binary.Write(&responseBuf, binary.BigEndian, response.CorrelationID)
 	binary.Write(&responseBuf, binary.BigEndian, response.ErrorCode)
+	binary.Write(&responseBuf, binary.BigEndian, response.APIVersion)
 
 	// Print response
-	fmt.Println("Response:", response)
+	// fmt.Println("Response:", response)
 
 	// Send complete response
 	conn.Write(responseBuf.Bytes())
