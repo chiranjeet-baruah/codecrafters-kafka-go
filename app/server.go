@@ -103,7 +103,7 @@ func handleConnection(conn net.Conn) {
 		// Prepare response with supported API keys
 		responseKeys := []ApiKeyVersion{
 			{ApiKey: 18, MinVersion: 0, MaxVersion: 4},
-			{ApiKey: 3, MinVersion: 0, MaxVersion: 4},
+			{ApiKey: 75, MinVersion: 0, MaxVersion: 0},
 			{ApiKey: 5, MinVersion: 0, MaxVersion: 4},
 		}
 
